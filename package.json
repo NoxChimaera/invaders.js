@@ -1,0 +1,26 @@
+{
+  "name": "invaders.js",
+  "version": "1.0.0",
+  "description": "JS project for Programming Paradigmas course (1 semester, master of Software Engineering, ISIT SibFU)",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://VoidSchemer@bitbucket.org/VoidSchemer/invaders.js.git"
+  },
+  "keywords": [
+    "js",
+    "game"
+  ],
+  "author": "M. Balushkin",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/VoidSchemer/invaders.js#readme",
+  "dependencies": {
+    "express": "^4.13.3"
+  }
+}
