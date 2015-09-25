@@ -33,20 +33,30 @@ function Space() {
     
   this.stars = [];
   this.minVelocity = 42;
-  this.maxVelocity = 142;
+  this.maxVelocity = 100;
 };
 
-function Star(x, y, size, velocity) {
+function Star(x, y, size, velocity, color) {
   this.x = x;
   this.y = y;
   this.size = size;
   this.velocity = velocity;
+  this.color = color;
+};
+
+var utils = {
+  getRandomHex: function(from, to) {
+    return Math.floor(Math.random() * (to - from) + from).toString(16);
+  },
+  getRandomColor: function(r, g, b) {
+    return '#' + this.getRandomHex(r, 255) + this.getRandomHex(g, 255) + this.getRandomHex(b, 255);
+  }
 };
 
 Space.prototype.init = function(container) {
   this.container = container;
-  this.width = window.innerWidth;
-  this.height = window.innerHeight;
+  this.width = 800;
+  this.height = 600;
   
   var canvas = document.createElement('canvas');
   container.appendChild(canvas);
@@ -56,7 +66,7 @@ Space.prototype.init = function(container) {
 };
 
 Space.prototype.start = function() {
-  for (var i = 0; i < 90; i++) {
+  for (var i = 0; i < 100; i++) {
     this.stars[i] = this.createNewStar();
   }
 
@@ -74,7 +84,7 @@ Space.prototype.update = function() {
     
     star.y += dt * star.velocity;
     
-    if (star.y > this.height) {
+    if (star.y > this.canvas.height) {
       this.stars[i] = this.createNewStar();
     }
   }
@@ -84,12 +94,12 @@ Space.prototype.draw = function() {
   var context = this.canvas.getContext('2d');
   
   // Fill dark
-  context.fillStyle = '#000002';
+  context.fillStyle = '#000020';
   context.fillRect(0, 0, this.width, this.height);
   
-  context.fillStyle = '#fff';
   for (var i = 0; i < this.stars.length; i++) {
     var star = this.stars[i];
+    context.fillStyle = star.color;
     context.beginPath();
     context.arc(star.x, star.y, star.size, 0, 2 * Math.PI, false);
     context.fill();
@@ -102,5 +112,6 @@ Space.prototype.createNewStar = function() {
       , 0
       , Math.random() * 3 + 1
       , (Math.random() * (this.maxVelocity - this.minVelocity)) + this.minVelocity
+      , utils.getRandomColor(200, 200, 200)
     );
 };
