@@ -39,11 +39,23 @@ THE SOFTWARE.
 </head>
 
 <div id="field"></div>
+<div id="gameContainer">
+  <canvas id="game"></canvas>
+</div>
 
-<script src="js/space.js"></script>
+<!--<script src="js/space.js"></script>-->
+<script src="js/game.js"></script>
 <script>
   var container = document.getElementById('field');
-  var field = new Space();
-  field.init(container);
-  field.start();
+  var game = new Game(container);
+  game.start();
+  
+//  var container = document.getElementById('field');
+//  var field = new Space();
+//  field.init(container);
+//  field.start();
+//  
+//  var gCanvas = document.getElementById('game');
+//  var game = new Game(gCanvas);
+//  game.start();
 </script>
