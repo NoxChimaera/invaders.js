@@ -29,7 +29,12 @@ var Utils = {
   },
   getRandomColor: function(r, g, b) {
     return '#' + this.getRandomHex(r, 255) + this.getRandomHex(g, 255) + this.getRandomHex(b, 255);
-  } 
+  },
+  const: {
+    SPACE: 32,
+    LEFT: 37,
+    RIGHT: 39
+  }
 };
 
 // Game
@@ -49,6 +54,7 @@ function Game(container) {
   this.canvas = canvas;
   
   this.stateStack = [];
+  this.pressedKeys = [];
 }
 
 // State machine
@@ -74,7 +80,7 @@ Game.prototype.setState = function(state) {
 
 Game.prototype.start = function() {
   this.background.start();
-  this.setState(new IntroState());
+  this.setState(new IntroState(this));
   
   var self = this;
   this.timer = setInterval(function() {
@@ -88,8 +94,10 @@ Game.prototype.update = function() {
   this.background.update(dt);
   
   var state = this.currentState();
+  if (!state) return;
+  
   if (state.update) {
-    state.update(this, dt);
+    state.update(dt);
   }
 };
 
@@ -100,6 +108,17 @@ Game.prototype.draw = function() {
   if (state.draw) {
     state.draw(this, this.canvas.getContext('2d'));
   }
+};
+
+Game.prototype.keyDown = function(keycode) {
+  this.pressedKeys[keycode] = true;
+  if (!this.currentState().keyDown) return;
+  this.currentState().keyDown(keycode);
+};
+Game.prototype.keyUp = function(keycode) {
+  this.pressedKeys[keycode] = false;
+  if (!this.currentState().keyUp) return;
+  this.currentState().keyUp(keycode);
 };
 
 //<editor-fold defaultstate="collapsed" desc="Space background">
@@ -169,9 +188,13 @@ Space.prototype.createNewStar = function() {
 //</editor-fold>
 
 // Game states
-function IntroState() {
+function IntroState(game) {
+  this.game = game;
+  this.isDrawable = true;
 }
 IntroState.prototype.draw = function(game, context) {
+  if (!this.isDrawable) return;
+  
   context.font = '72px Mono';
   context.fillStyle = '#ff0';
   context.textAlign = 'center';
@@ -183,4 +206,70 @@ IntroState.prototype.draw = function(game, context) {
   context.textAlign = 'center';
   context.fillText('Press SPACE to start', game.width / 2, game.height / 2 + 80);
   context.fillText('[←] [→] - MOVE, [SPACE] - SHOOT', game.width / 2, game.height / 2 + 97);
+};
+IntroState.prototype.leave = function() {
+  this.isDrawable = false;
+};
+IntroState.prototype.keyDown = function(keycode) {
+  if (keycode === Utils.const.SPACE) 
+    this.game.setState(new GameState(this.game));
+};
+
+// Game state
+function Ship(x, y) {
+  this.x = x;
+  this.y = y;
+  
+  this.width = 32;
+  this.height = 64;
+  
+  this.velocity = 40;
+}
+
+function GameState(game) {
+  this.game = game;
+  this.isDrawable = true;
+  
+  this.score = 0;
+  this.lives = 3;
+  this.level = 1;
+  
+  this.playerShip = new Ship(game.width /2 - 16, game.height - 80);
+  this.hive = [];
+}
+
+GameState.prototype.update = function(dt) {
+  if (this.game.pressedKeys[Utils.const.LEFT]) {
+    this.playerShip.x -= this.playerShip.velocity * dt;
+    if (this.playerShip.x < 0) {
+      this.playerShip.x = 0;
+    }
+  }
+  if (this.game.pressedKeys[Utils.const.RIGHT]) {
+    this.playerShip.x += this.playerShip.velocity * dt;
+    if (this.playerShip.x + this.playerShip.width > this.game.width) {
+      this.playerShip.x = this.game.width - this.playerShip.width;
+    }
+  }
+};
+
+GameState.prototype.draw = function(game, context) {
+  // Drawing game info
+  
+//      star.y += dt * star.velocity;
+
+  // Drawing player
+  var player = this.playerShip;
+  context.fillStyle = '#888';
+  context.fillRect(player.x, player.y, player.width, player.height);
+  
+  // Drawing hive
+};
+
+GameState.prototype.keyDown = function(keycode) {
+  switch (keycode) {
+//    case Utils.const.LEFT:
+//      this.playerShip.x -= this.playerShip.velocity * dt;
+//      break;
+  }
 };
