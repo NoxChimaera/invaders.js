@@ -28,6 +28,9 @@ THE SOFTWARE.
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    body {
+        background-color: #000020;
+    }
     #field {
         width: 800px;
         height: 600px;
@@ -38,24 +41,27 @@ THE SOFTWARE.
   </style>
 </head>
 
-<div id="field"></div>
-<div id="gameContainer">
-  <canvas id="game"></canvas>
-</div>
+<center>
+  <div id="field"></div>
+</center>
 
-<!--<script src="js/space.js"></script>-->
+<script src="js/utils.js"></script>
 <script src="js/game.js"></script>
+<script src="js/space.js"></script>
+<script src="js/states/introState.js"></script>
+<script src="js/states/gameState.js"></script>
 <script>
+  /* global Utils */
+
   var container = document.getElementById('field');
   var game = new Game(container);
   game.start();
-  
   window.addEventListener('keydown', function(e) {
     var keycode = e.which || window.event.keycode;
     switch (keycode) {
-      case 37: // left
-      case 39: // right
-      case 32: // space
+      case Utils.const.LEFT:
+      case Utils.const.RIGHT:
+      case Utils.const.SPACE:
         e.preventDefault();
     }
     game.keyDown(keycode);
