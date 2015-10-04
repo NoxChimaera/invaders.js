@@ -22,6 +22,8 @@
  * THE SOFTWARE.
  */
 
+/* global Utils */
+
 function IntroState(game) {
   this.game = game;
   this.isDrawable = true;

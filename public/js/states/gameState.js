@@ -22,6 +22,8 @@
  * THE SOFTWARE.
  */
 
+/* global Utils */
+
 function Ship(x, y) {
   this.x = x;
   this.y = y;
@@ -30,6 +32,16 @@ function Ship(x, y) {
   this.height = 64;
   
   this.velocity = 40;
+}
+
+function Rocket(x, y) {
+  this.x = x;
+  this.y = y;
+  
+  this.w = 4;
+  this.h = 8;
+  
+  this.velocity = -42;
 }
 
 function GameState(game) {
@@ -41,6 +53,7 @@ function GameState(game) {
   this.level = 1;
   
   this.playerShip = new Ship(game.width /2 - 16, game.height - 80);
+  this.rockets = [];
   this.hive = [];
 }
 
@@ -57,25 +70,66 @@ GameState.prototype.update = function(dt) {
       this.playerShip.x = this.game.width - this.playerShip.width;
     }
   }
+  
+  // Move rockets
+  for (var i = 0; i < this.rockets.length; i++) {    
+    var rocket = this.rockets[i];
+    if (rocket.y < 0) {
+      this.rockets.splice(i--, 1);
+      rocket = this.rockets[i];
+    }
+    
+    if (!rocket) break;
+    
+    rocket.y += rocket.velocity * dt;
+  }
 };
 
 GameState.prototype.draw = function(game, context) {
   // Drawing game info
+  var text = 'Lives: ' + this.lives;
+  context.font = '24px Mono';
+  context.fillStyle = '#ff0';
+  context.textAlign = 'left';
+  context.fillText(text, 0, 24);
   
-//      star.y += dt * star.velocity;
-
+  text = 'Score: ' + this.score;
+  context.textAlign = 'right';
+  context.fillText(text, game.width, 24);
+  
   // Drawing player
   var player = this.playerShip;
   context.fillStyle = '#888';
   context.fillRect(player.x, player.y, player.width, player.height);
   
   // Drawing hive
+  
+  // Drawing rockets
+  context.fillStyle = '#f00';
+  this.rockets.forEach(function(rocket) {
+    context.fillRect(
+      rocket.x - rocket.w / 2
+      , rocket.y - rocket.h / 2
+      , rocket.w
+      , rocket.h
+    );
+  });
 };
 
 GameState.prototype.keyDown = function(keycode) {
   switch (keycode) {
-//    case Utils.const.LEFT:
-//      this.playerShip.x -= this.playerShip.velocity * dt;
-//      break;
+    case Utils.const.SPACE:
+      this.fire();
+      break;
   }
+};
+
+GameState.prototype.fire = function() {
+  var rocketsCount = this.rockets.length;
+  if (rocketsCount > 2) return;
+  
+  this.rockets.push(new Rocket(
+    this.playerShip.x + this.playerShip.width / 2
+    , this.playerShip.y - 2
+  ));
 };

@@ -80,10 +80,10 @@ Space.prototype.update = function(dt) {
 Space.prototype.createNewStar = function() {
   return new Star(
     Math.random() * this.canvas.width
-  , 0
-  , Math.random() * 3 + 1
-  , (Math.random() * (this.config.maxStarVelocity - this.config.minStarVelocity)) 
+    , 0
+    , Math.random() * 3 + 1
+    , (Math.random() * (this.config.maxStarVelocity - this.config.minStarVelocity)) 
     + this.config.minStarVelocity
-  , Utils.getRandomColor(200, 200, 200)
-    );
+    , Utils.getRandomColor(200, 200, 200)
+  );
 };
