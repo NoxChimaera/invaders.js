@@ -24,24 +24,24 @@
 
 /* global Utils */
 
-function Ship(x, y) {
+function Ship(x, y, w, h, velocity) {
   this.x = x;
   this.y = y;
   
-  this.width = 32;
-  this.height = 64;
+  this.width = w;
+  this.height = h;
   
-  this.velocity = 40;
+  this.velocity = velocity;
 }
 
-function Rocket(x, y) {
+function Rocket(x, y, velocity) {
   this.x = x;
   this.y = y;
   
   this.w = 4;
   this.h = 8;
   
-  this.velocity = -42;
+  this.velocity = velocity;
 }
 
 function GameState(game) {
@@ -50,12 +50,43 @@ function GameState(game) {
   
   this.score = 0;
   this.lives = 3;
-  this.level = 1;
+//  this.level = 1;
   
-  this.playerShip = new Ship(game.width /2 - 16, game.height - 80);
+  this.bombRatio = 0.05;
+  
+  this.playerShip = new Ship(
+    game.width /2 - 16
+    , game.height - 80
+    , 32
+    , 64
+    , 40
+  );
   this.rockets = [];
   this.hive = [];
+  this.bombs = [];
+  
+  this.hiveVector = {
+    x: 1,
+    y: 1
+  };
 }
+
+GameState.prototype.enter = function() {
+  // Generate hive. So magic
+  var hiveShipSize = 32;
+  for (var j = 0; j < 2; j++) {
+    for (var i = -5; i <= 5; i++) {
+      var x = this.game.width / 2 + i * (hiveShipSize + 10);
+      this.hive[(i + 5) + (j * 11)] = new Ship(
+        x
+        , (j + 2) * (hiveShipSize + 10)
+        , hiveShipSize
+        , hiveShipSize
+        , 20
+      );
+    }
+  }
+};
 
 GameState.prototype.update = function(dt) {
   if (this.game.pressedKeys[Utils.const.LEFT]) {
@@ -78,10 +109,96 @@ GameState.prototype.update = function(dt) {
       this.rockets.splice(i--, 1);
       rocket = this.rockets[i];
     }
-    
     if (!rocket) break;
     
     rocket.y += rocket.velocity * dt;
+  }
+  
+  // Move bombs
+  for (var i = 0; i < this.bombs.length; i++) {
+    var bomb = this.bombs[i];
+    if (bomb.y > this.game.height) {
+      this.bombs.splice(i--, 1);
+      bomb = this.bombs[i];
+    }
+    if (!bomb) break;
+    bomb.y += bomb.velocity * dt;
+  }
+  
+  
+  // Move hive and drop bombs
+  var self = this;
+  var boundRight, boundLeft, boundTop, boundBottom = false;
+  this.hive.forEach(function(enemy) {
+    // Bound left and right
+    if (enemy.x + enemy.width > self.game.width - enemy.width) boundRight = true;
+    if (enemy.x - enemy.width < enemy.width) boundLeft = true;
+
+    // Bound top and bottom
+    if (enemy.y + enemy.height > self.playerShip.y - enemy.height) boundBottom = true;
+    if (enemy.y - enemy.height < enemy.height) boundTop = true;
+            
+    enemy.x += enemy.velocity * dt * self.hiveVector.x;
+    enemy.y += enemy.velocity * dt * self.hiveVector.y / 20;
+    
+    // Drop bombs
+    var chance = self.bombRatio;
+    if (chance < Math.random() || self.bombs.length >= 10) {
+      return;
+    } else {
+      var bomb = new Rocket(
+        enemy.x + enemy.width / 2
+        , enemy.y + enemy.height / 2
+        , 50
+      );
+      self.bombs.push(bomb);
+    }
+  });
+
+  if (boundRight) {
+    boundRight = false;
+    this.hiveVector.x = -1;
+  }
+  if (boundLeft) {
+    boundLeft = false;
+    this.hiveVector.x = 1;
+  }
+  if (boundTop) {
+    boundTop = false;
+    this.hiveVector.y = 1;
+  }
+  if (boundBottom) {
+    boundBottom = false;
+    this.hiveVector.y = -1;
+  }
+  
+  // Test collisions
+  // Rocket - hive
+  for (var i = 0; i < this.hive.length; i++) {
+    var enemy = this.hive[i];
+    if (!enemy) continue;
+    
+    var collide = false;
+    for (var j = 0; j < this.rockets.length; j++) {
+      var rocket = this.rockets[j];
+      if (!rocket) continue;
+      
+      if (
+        ((rocket.x + rocket.w < enemy.x) || (rocket.x > enemy.x + enemy.width))
+        || ((rocket.y + rocket.h < enemy.y) || (rocket.y > enemy.y + enemy.height))
+      ) { 
+        continue; 
+      } 
+      
+      collide = true;
+      this.score += 10;
+      this.rockets.splice(j--, 1);
+      
+      break;
+    }
+    if (collide) {      
+      this.hive.splice(i--, 1);
+    }
   }
 };
 
@@ -103,10 +220,29 @@ GameState.prototype.draw = function(game, context) {
   context.fillRect(player.x, player.y, player.width, player.height);
   
   // Drawing hive
+  context.fillStyle = '#0f0';
+  this.hive.forEach(function(enemy) {
+    context.fillRect(
+      enemy.x
+      , enemy.y
+      , enemy.width
+      , enemy.height
+    );
+  });
   
-  // Drawing rockets
-  context.fillStyle = '#f00';
+  // Drawing rockets and bombs
+  context.fillStyle = '#0ff';
   this.rockets.forEach(function(rocket) {
+    context.fillRect(
+      rocket.x - rocket.w / 2
+      , rocket.y - rocket.h / 2
+      , rocket.w
+      , rocket.h
+    );
+  });
+  
+  context.fillStyle = '#f00';
+  this.bombs.forEach(function(rocket) {
     context.fillRect(
       rocket.x - rocket.w / 2
       , rocket.y - rocket.h / 2
@@ -131,5 +267,6 @@ GameState.prototype.fire = function() {
   this.rockets.push(new Rocket(
     this.playerShip.x + this.playerShip.width / 2
     , this.playerShip.y - 2
+    , -42
   ));
 };
