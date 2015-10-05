@@ -38,8 +38,8 @@ function Rocket(x, y, velocity) {
   this.x = x;
   this.y = y;
   
-  this.w = 4;
-  this.h = 8;
+  this.width = 4;
+  this.height = 8;
   
   this.velocity = velocity;
 }
@@ -50,9 +50,8 @@ function GameState(game) {
   
   this.score = 0;
   this.lives = 3;
-//  this.level = 1;
   
-  this.bombRatio = 0.05;
+  this.bombRatio = 0.025;
   
   this.playerShip = new Ship(
     game.width /2 - 16
@@ -82,7 +81,7 @@ GameState.prototype.enter = function() {
         , (j + 2) * (hiveShipSize + 10)
         , hiveShipSize
         , hiveShipSize
-        , 20
+        , 40
       );
     }
   }
@@ -100,6 +99,39 @@ GameState.prototype.update = function(dt) {
     if (this.playerShip.x + this.playerShip.width > this.game.width) {
       this.playerShip.x = this.game.width - this.playerShip.width;
     }
+  }
+  
+  // Test collisions
+  // Rocket - hive
+  for (var i = 0; i < this.hive.length; i++) {
+    var enemy = this.hive[i];
+    if (!enemy) continue;
+    
+    var collide = false;
+    for (var j = 0; j < this.rockets.length; j++) {
+      var rocket = this.rockets[j];
+      if (!rocket) continue;
+      if (!Utils.rectIntersects(enemy, rocket)) continue; 
+      
+      collide = true;
+      this.score += 10;
+      this.rockets.splice(j--, 1);
+      
+      break;
+    }
+    if (collide) {      
+      this.hive.splice(i--, 1);
+    }
+  }
+  // Bomb - player ship
+  for (var bombId = 0; bombId < this.bombs.length; bombId++) {
+    var bomb = this.bombs[bombId];
+    if (!bomb) continue;
+    if (!Utils.rectIntersects(this.playerShip, bomb)) continue;
+    
+    this.lives--;
+    this.bombs = [];
+    break;
   }
   
   // Move rockets
@@ -124,7 +156,6 @@ GameState.prototype.update = function(dt) {
     if (!bomb) break;
     bomb.y += bomb.velocity * dt;
   }
-  
   
   // Move hive and drop bombs
   var self = this;
@@ -172,33 +203,12 @@ GameState.prototype.update = function(dt) {
     this.hiveVector.y = -1;
   }
   
-  // Test collisions
-  // Rocket - hive
-  for (var i = 0; i < this.hive.length; i++) {
-    var enemy = this.hive[i];
-    if (!enemy) continue;
-    
-    var collide = false;
-    for (var j = 0; j < this.rockets.length; j++) {
-      var rocket = this.rockets[j];
-      if (!rocket) continue;
-      
-      if (
-        ((rocket.x + rocket.w < enemy.x) || (rocket.x > enemy.x + enemy.width))
-        || ((rocket.y + rocket.h < enemy.y) || (rocket.y > enemy.y + enemy.height))
-      ) { 
-        continue; 
-      } 
-      
-      collide = true;
-      this.score += 10;
-      this.rockets.splice(j--, 1);
-      
-      break;
-    }
-    if (collide) {      
-      this.hive.splice(i--, 1);
-    }
+  // Fail or Victory
+  if (this.lives <= 0) {
+    this.game.setState(new GameOverState(this.game, this.score));
+  }
+  if (this.hive.length === 0) {
+    this.game.setState(new WinState(this.game));
   }
 };
 
@@ -234,20 +244,20 @@ GameState.prototype.draw = function(game, context) {
   context.fillStyle = '#0ff';
   this.rockets.forEach(function(rocket) {
     context.fillRect(
-      rocket.x - rocket.w / 2
-      , rocket.y - rocket.h / 2
-      , rocket.w
-      , rocket.h
+      rocket.x - rocket.width / 2
+      , rocket.y - rocket.height / 2
+      , rocket.width
+      , rocket.height
     );
   });
   
   context.fillStyle = '#f00';
   this.bombs.forEach(function(rocket) {
     context.fillRect(
-      rocket.x - rocket.w / 2
-      , rocket.y - rocket.h / 2
-      , rocket.w
-      , rocket.h
+      rocket.x - rocket.width / 2
+      , rocket.y - rocket.height / 2
+      , rocket.width
+      , rocket.height
     );
   });
 };

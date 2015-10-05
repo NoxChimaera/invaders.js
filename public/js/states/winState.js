@@ -22,21 +22,32 @@
  * THE SOFTWARE.
  */
 
-var Utils = {
-  getRandomHex: function(from, to) {
-    return Math.floor(Math.random() * (to - from) + from).toString(16);
-  },
-  getRandomColor: function(r, g, b) {
-    return '#' + this.getRandomHex(r, 255) + this.getRandomHex(g, 255) + this.getRandomHex(b, 255);
-  },
-  rectIntersects: function(a, b) {
-    var foo = ((a.x + a.width < b.x) || (a.x > b.x + b.width))
-        || ((a.y + a.height < b.y) || (a.y > b.y + b.height));
-    return !foo;
-  },
-  const: {
-    SPACE: 32,
-    LEFT: 37,
-    RIGHT: 39
-  }
+/* global Utils */
+
+function WinState(game, score) {
+  this.game = game;
+  this.score = score;
+  this.isDrawable = true;
+}
+
+WinState.prototype.draw = function(game, context) {
+  if (!this.isDrawable) return;
+  context.font = '72px Mono';
+  context.fillStyle = '#ff0';
+  context.textAlign = 'center';
+  var title = 'MISSION COMPLETED';
+  context.fillText(title, game.width / 2, game.height / 2 + 36);
+
+  context.font = '12px Mono';
+  context.fillStyle = '#ff0';
+  context.textAlign = 'center';
+  context.fillText('Press [SPACE] to try again', game.width / 2, game.height / 2 + 80);
+};
+
+WinState.prototype.leave = function() {
+  this.isDrawable = false;
+};
+WinState.prototype.keyDown = function(keycode) {
+  if (keycode === Utils.const.SPACE) 
+    this.game.setState(new GameState(this.game));
 };
