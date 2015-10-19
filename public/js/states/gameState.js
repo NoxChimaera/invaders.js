@@ -208,7 +208,7 @@ GameState.prototype.update = function(dt) {
     this.game.setState(new GameOverState(this.game, this.score));
   }
   if (this.hive.length === 0) {
-    this.game.setState(new WinState(this.game));
+    this.game.setState(new InterlevelState(this.game, this.lives, this.score));
   }
 };
 
