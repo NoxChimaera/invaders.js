@@ -1,4 +1,32 @@
-/* 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: states/gameState.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: states/gameState.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
  * The MIT License
  *
  * Copyright 2015 Maximillian M..
@@ -97,8 +125,8 @@ function GameState(game) {
 GameState.prototype.enter = function() {
   // Generate hive. So magic
   var hiveShipSize = 32;
-  for (var j = 0; j < 2; j++) {
-    for (var i = -5; i <= 5; i++) {
+  for (var j = 0; j &lt; 2; j++) {
+    for (var i = -5; i &lt;= 5; i++) {
       var x = this.game.width / 2 + i * (hiveShipSize + 10);
       this.hive[(i + 5) + (j * 11)] = new Ship(
         x
@@ -118,7 +146,7 @@ GameState.prototype.enter = function() {
 GameState.prototype.update = function(dt) {
   if (this.game.pressedKeys[Utils.const.LEFT]) {
     this.playerShip.x -= this.playerShip.velocity * dt;
-    if (this.playerShip.x < 0) {
+    if (this.playerShip.x &lt; 0) {
       this.playerShip.x = 0;
     }
   }
@@ -131,12 +159,12 @@ GameState.prototype.update = function(dt) {
   
   // Test collisions
   // Rocket - hive
-  for (var i = 0; i < this.hive.length; i++) {
+  for (var i = 0; i &lt; this.hive.length; i++) {
     var enemy = this.hive[i];
     if (!enemy) continue;
     
     var collide = false;
-    for (var j = 0; j < this.rockets.length; j++) {
+    for (var j = 0; j &lt; this.rockets.length; j++) {
       var rocket = this.rockets[j];
       if (!rocket) continue;
       if (!Utils.rectIntersects(enemy, rocket)) continue; 
@@ -152,7 +180,7 @@ GameState.prototype.update = function(dt) {
     }
   }
   // Bomb - player ship
-  for (var bombId = 0; bombId < this.bombs.length; bombId++) {
+  for (var bombId = 0; bombId &lt; this.bombs.length; bombId++) {
     var bomb = this.bombs[bombId];
     if (!bomb) continue;
     if (!Utils.rectIntersects(this.playerShip, bomb)) continue;
@@ -163,9 +191,9 @@ GameState.prototype.update = function(dt) {
   }
   
   // Move rockets
-  for (var i = 0; i < this.rockets.length; i++) {    
+  for (var i = 0; i &lt; this.rockets.length; i++) {    
     var rocket = this.rockets[i];
-    if (rocket.y < 0) {
+    if (rocket.y &lt; 0) {
       this.rockets.splice(i--, 1);
       rocket = this.rockets[i];
     }
@@ -175,7 +203,7 @@ GameState.prototype.update = function(dt) {
   }
   
   // Move bombs
-  for (var i = 0; i < this.bombs.length; i++) {
+  for (var i = 0; i &lt; this.bombs.length; i++) {
     var bomb = this.bombs[i];
     if (bomb.y > this.game.height) {
       this.bombs.splice(i--, 1);
@@ -191,18 +219,18 @@ GameState.prototype.update = function(dt) {
   this.hive.forEach(function(enemy) {
     // Bound left and right
     if (enemy.x + enemy.width > self.game.width - enemy.width) boundRight = true;
-    if (enemy.x - enemy.width < enemy.width) boundLeft = true;
+    if (enemy.x - enemy.width &lt; enemy.width) boundLeft = true;
 
     // Bound top and bottom
     if (enemy.y + enemy.height > self.playerShip.y - enemy.height) boundBottom = true;
-    if (enemy.y - enemy.height < enemy.height) boundTop = true;
+    if (enemy.y - enemy.height &lt; enemy.height) boundTop = true;
             
     enemy.x += enemy.velocity * dt * self.hiveVector.x;
     enemy.y += enemy.velocity * dt * self.hiveVector.y / 20;
     
     // Drop bombs
     var chance = self.bombRatio;
-    if (chance < Math.random() || self.bombs.length >= 10) {
+    if (chance &lt; Math.random() || self.bombs.length >= 10) {
       return;
     } else {
       var bomb = new Rocket(
@@ -232,7 +260,7 @@ GameState.prototype.update = function(dt) {
   }
   
   // Fail or Victory
-  if (this.lives <= 0) {
+  if (this.lives &lt;= 0) {
     this.game.setState(new GameOverState(this.game, this.score));
   }
   if (this.hive.length === 0) {
@@ -319,4 +347,26 @@ GameState.prototype.fire = function() {
     , this.playerShip.y - 2
     , -42
   ));
-};
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li><li><a href="GameOverState.html">GameOverState</a></li><li><a href="GameState.html">GameState</a></li><li><a href="InterlevelState.html">InterlevelState</a></li><li><a href="IntroState.html">IntroState</a></li><li><a href="Rocket.html">Rocket</a></li><li><a href="Ship.html">Ship</a></li><li><a href="Space.html">Space</a></li><li><a href="WinState.html">WinState</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Star">Star</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 18:52:47 GMT+0700 (RTZ 6 (зима))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
